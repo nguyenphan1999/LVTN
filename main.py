@@ -10,7 +10,7 @@ def setup_cam(cam_id):
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
     cap.set(cv2.CAP_PROP_FPS, 30)
     cap.set(cv2.CAP_PROP_AUTO_WB,0)
-    cap.set(cv2.CAP_PROP_WB_TEMPERATURE,6000)
+    cap.set(cv2.CAP_PROP_WB_TEMPERATURE,4000)
     cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,1) # 0:Auto, 1:Manual, 2:Shutter, 3:Aperture
     cap.set(cv2.CAP_PROP_EXPOSURE, 1000) 
     #Notice when setting up webcam: CAP_V4L2, MJPG, CAP_PROP_FPS, CAP_PROP_EXPOSURE for optimal FPS in this order.
