@@ -1,5 +1,6 @@
 import cv2
 import time
+import numpy as np
 
 
 def setup_cam(cam_id): 
@@ -19,13 +20,16 @@ def setup_cam(cam_id):
 def main():
 
     cam_1=setup_cam(1)
+    cam_2=setup_cam(2)
     
     while True:
         start_time = time.time()
         _, frame_1 = cam_1.read()
+        _, frame_2 = cam_2.read()
         FPS= 1.0 / (time.time() - start_time)
         cv2.putText(frame_1, str("%.2f" %FPS), (30,30),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
-        
+        cv2.putText(frame_2, str("%.2f" %FPS), (30,30),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
+        frame_1 = np.concatenate((frame_1, frame_2), axis=1)
         cv2.imshow("a",frame_1)
         
         # ESC pressed 
