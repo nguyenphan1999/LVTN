@@ -4,23 +4,13 @@ import numpy as np
 from threading  import Thread
 
 
-# def setup_cam(cam_id): 
-#     # Set up Webcam
-#     cap= cv2.VideoCapture(cam_id,cv2.CAP_V4L2)
-#     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-#     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
-#     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
-#     cap.set(cv2.CAP_PROP_FPS, 30)
-#     cap.set(cv2.CAP_PROP_AUTO_WB,0)
-#     cap.set(cv2.CAP_PROP_WB_TEMPERATURE,4000)
-#     cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,1) # 0:Auto, 1:Manual, 2:Shutter, 3:Aperture
-#     cap.set(cv2.CAP_PROP_EXPOSURE, 1000) 
-#     #Notice when setting up webcam: CAP_V4L2, MJPG, CAP_PROP_FPS, CAP_PROP_EXPOSURE for optimal FPS in this order.
-#     return cap
-
 class cam:
     def __init__(self,cam_id):
         self.cam_id = cam_id 
+        self.capture=None
+        self.read_thread=None
+        self.frame=None
+        self.running=False
 
 
     def start_running(self):
@@ -34,27 +24,37 @@ class cam:
         self.capture.set(cv2.CAP_PROP_AUTO_EXPOSURE,1) # 0:Auto, 1:Manual, 2:Shutter, 3:Aperture
         self.capture.set(cv2.CAP_PROP_EXPOSURE, 1000)  
         #_,self.frame = self.capture.read()
-        self.thread=Thread(target=self.update,args=())
-        self.thread.daemon=True
-        self.thread.start() 
+        self.running=True
+        self.read_thread=Thread(target=self.update,args=())
+        self.read_thread.daemon=True
+        self.read_thread.start() 
 
     def update(self):
-        while True:
+        while self.running:
             _,self.frame=self.capture.read()
+            
+        
     
     def getFrame(self):
         return self.frame
 
     def stop_and_release(self):
         # Kill the thread
+        self.running=False
         self.capture.release()
-        self.thread.join()
+        self.capture=None
+        self.read_thread.join()
+        self.read_thread=None
+
+
+        
+
 
 
 def main():
 
-    cam_1=cam(1)
-    cam_2=cam(2)
+    cam_1=cam(4)
+    cam_2=cam(5)
     cam_1.start_running()
     cam_2.start_running()
     start_time = time.time()
@@ -72,11 +72,12 @@ def main():
 
         except:
             print("No frame")
-                            # ESC pressed 
+        # ESC pressed 
         if cv2.waitKey(1)%256==27:
             cam_1.stop_and_release()
             cam_2.stop_and_release()
             cv2.destroyAllWindows()
+            exit(1)
             break
 
     
