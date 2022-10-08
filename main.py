@@ -15,6 +15,8 @@ def setup_cam(cam_id):
     cap.set(cv2.CAP_PROP_EXPOSURE, 1000) 
     #Notice when setting up webcam: CAP_V4L2, MJPG, CAP_PROP_FPS, CAP_PROP_EXPOSURE for optimal FPS in this order.
     return cap
+def bottle_cap_inspection(img):
+    img=img
 
 def main():
 
