@@ -111,6 +111,25 @@ def bottle_cap_inspection(img):
     #img[np.where(mask==0)] = 255
     return img
 
+def bottle_fill_inspection(img):
+    img_gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    
+    _,mask= cv2.threshold(img_gray, 50,255, cv2.THRESH_BINARY_INV)
+    M = cv2.moments(mask)
+ 
+    # calculate x,y coordinate of center
+    cX = int(M["m10"] / M["m00"])
+    roi = mask[0:30,cX-20:cX+20]
+    edge=cv2.Canny(roi,10,100)
+    cv2.imshow("roi",edge)
+
+    M = cv2.moments(edge)
+    cY = int(M["m01"] / M["m00"])
+    if cY >20 or cY<5:
+        print("Wrong fill")
+    return mask
+
+
 def main():
     
     cam_1=setup_cam(0)
@@ -127,7 +146,8 @@ def main():
         
         
         #frame_1= bottle_cap_inspection(cv2.resize(frame_1,(360,640))[0:160,0:360])
-        frame_1=bottle_cap_inspection(frame_1[0:300,0:720])
+        #frame_1=bottle_cap_inspection(frame_1[0:300,0:720])
+        frame_1=bottle_fill_inspection(cv2.resize(frame_1,(360,640))[280:310,0:360])
         FPS= 1.0 / (time.time() - start_time)
         cv2.putText(frame_1, str("%.2f" %FPS), (30,30),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
         cv2.imshow("a",frame_1)
