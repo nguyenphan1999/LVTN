@@ -3,29 +3,29 @@ import time
 import numpy as np
 import math
 
-# def click_event(event, x, y, flags, params):
+def click_event(event, x, y, flags, params):
  
-#     # checking for left mouse clicks
-#     if event == cv2.EVENT_LBUTTONDOWN:
+    # checking for left mouse clicks
+    if event == cv2.EVENT_LBUTTONDOWN:
  
-#         # displaying the coordinates
-#         # on the Shell
-#         print('Coorinate:',y, ' ', x)
+        # displaying the coordinates
+        # on the Shell
+        print('Coorinate:',y, ' ', x)
 
  
-#     # checking for right mouse clicks    
-#     if event==cv2.EVENT_RBUTTONDOWN:
+    # checking for right mouse clicks    
+    if event==cv2.EVENT_RBUTTONDOWN:
  
-        
-#         # b = frame_1[y, x,0]
-#         # g = frame_1[y, x,1]
-#         # r = frame_1[y, x,2]
-#         # print(b,' ',g,' ',r)
+        try: 
+            b = frame[y, x,0]
+            g = frame[y, x,1]
+            r = frame[y, x,2]
+            print(b,' ',g,' ',r)
+        except:
+            print(frame[y, x])
 
-#         print(frame_1[y, x])
 
-
-def setup_cam(cam_id): 
+def setup_cam_cap_and_fill(cam_id): 
     # Set up Webcam
     cap= cv2.VideoCapture(cam_id,cv2.CAP_V4L2)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -35,6 +35,23 @@ def setup_cam(cam_id):
     #cap.set(cv2.CAP_PROP_BRIGHTNESS, 240) 
     # cap.set(cv2.CAP_PROP_CONTRAST, 255)
     cap.set(cv2.CAP_PROP_SATURATION,0)
+    cap.set(cv2.CAP_PROP_AUTO_WB,0)
+    cap.set(cv2.CAP_PROP_WB_TEMPERATURE,5000)
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,3) # 0:Auto, 1:Manual, 2:Shutter, 3:Aperture
+    #cap.set(cv2.CAP_PROP_EXPOSURE, 1000) 
+    #Notice when setting up webcam: CAP_V4L2, MJPG, CAP_PROP_FPS, CAP_PROP_EXPOSURE for optimal FPS in this order.
+    return cap
+
+def setup_cam_label_and_shape(cam_id): 
+    # Set up Webcam
+    cap= cv2.VideoCapture(cam_id,cv2.CAP_V4L2)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    #cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
+    cap.set(cv2.CAP_PROP_FPS, 30)
+    #cap.set(cv2.CAP_PROP_BRIGHTNESS, 240) 
+    # cap.set(cv2.CAP_PROP_CONTRAST, 255)
+    #cap.set(cv2.CAP_PROP_SATURATION,0)
     cap.set(cv2.CAP_PROP_AUTO_WB,0)
     cap.set(cv2.CAP_PROP_WB_TEMPERATURE,5000)
     cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,3) # 0:Auto, 1:Manual, 2:Shutter, 3:Aperture
@@ -108,9 +125,6 @@ def bottle_cap_inspection(img):
         except:
             pass
     
-
-    #img[np.where(mask==0)] = 255
-    
 def bottle_fill_inspection(img):
     img_gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     # cv2.imshow("gray",img_gray)
@@ -137,11 +151,20 @@ def bottle_fill_inspection(img):
         #print("too much")
         return 0
 
-
+def bottle_label_inspection(img):
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #thresh = cv2.adaptiveThreshold(img_gray, 255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 31, 5)
+    _,mask= cv2.threshold(img_gray, 30,255, cv2.THRESH_BINARY_INV)
+    edge= cv2.Canny(mask, 10,100)
+    cv2.imshow("gray", edge)
+    return img_gray
 def main():
+    global frame
+
+    #cam_1=setup_cam_cap_and_fill(0)
+    cam_1=setup_cam_label_and_shape(0)
     
-    cam_1=setup_cam(0)
-    #global frame_1
+    
 
     while True:
         start_time = time.time()
@@ -152,27 +175,28 @@ def main():
         #bottle_cap= bottle_cap_inspection(cv2.resize(frame_1,(360,640))[0:160,0:360])
         frame= cv2.resize(frame_1, (360,640))
 
-        bottle_cap=bottle_cap_inspection(frame_1[0:300,0:720])
-        bottle_fill=bottle_fill_inspection(cv2.resize(frame_1,(360,640))[280:310,0:360])
+        # bottle_cap=bottle_cap_inspection(frame_1[0:300,0:720])
+        # bottle_fill=bottle_fill_inspection(cv2.resize(frame_1,(360,640))[280:310,0:360])
         
-        if bottle_cap==0:
-            cv2.putText(frame, "No cap", (10,600),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
-        elif bottle_cap==1:
-            cv2.putText(frame, "Defect cap", (10,600),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
-        elif bottle_cap==2:
-            cv2.putText(frame, "Good cap", (10,600),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
+        # if bottle_cap==0:
+        #     cv2.putText(frame, "No cap", (10,600),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
+        # elif bottle_cap==1:
+        #     cv2.putText(frame, "Defect cap", (10,600),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
+        # elif bottle_cap==2:
+        #     cv2.putText(frame, "Good cap", (10,600),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
 
-        if bottle_fill==0:
-            cv2.putText(frame, "Bad fill", (10,630),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2,cv2.LINE_AA)
-        elif bottle_fill==1:
-            cv2.putText(frame, "Good fill", (10,630),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2,cv2.LINE_AA)
+        # if bottle_fill==0:
+        #     cv2.putText(frame, "Bad fill", (10,630),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2,cv2.LINE_AA)
+        # elif bottle_fill==1:
+        #     cv2.putText(frame, "Good fill", (10,630),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2,cv2.LINE_AA)
 
+        frame= bottle_label_inspection(frame[215:380,0:360])
         
         FPS= 1.0 / (time.time() - start_time)
         cv2.putText(frame, str("%.2f" %FPS), (30,30),cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2,cv2.LINE_AA)
-        cv2.imshow("a",frame)
         
-        # cv2.setMouseCallback("a", click_event)
+        cv2.imshow("a",frame)
+        cv2.setMouseCallback("a", click_event)
 
         # ESC pressed 
         k= cv2.waitKey(1)
