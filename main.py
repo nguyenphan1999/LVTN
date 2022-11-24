@@ -154,9 +154,9 @@ def bottle_fill_inspection(img):
 def bottle_label_inspection(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     #thresh = cv2.adaptiveThreshold(img_gray, 255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 31, 5)
-    _,mask= cv2.threshold(img_gray, 30,255, cv2.THRESH_BINARY_INV)
-    edge= cv2.Canny(mask, 10,100)
-    cv2.imshow("gray", edge)
+    _,mask= cv2.threshold(img_gray, 150,255, cv2.THRESH_BINARY)
+    edge= cv2.Canny(mask, 10,30)
+    cv2.imshow("gray", mask)
     return img_gray
 def main():
     global frame
